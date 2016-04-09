@@ -34,7 +34,6 @@ class Raw:
             "x86": CS_ARCH_X86,
             "arm": CS_ARCH_ARM,
             "arm64": CS_ARCH_ARM64,
-            "sparc": CS_ARCH_SPARC,
             "mips": CS_ARCH_MIPS,
             "ppc": CS_ARCH_PPC
         }
