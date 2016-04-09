@@ -136,11 +136,6 @@ class Gadgets:
             ]
         elif arch == CS_ARCH_PPC:
             gadgets = []  # PPC architecture doesn't contains reg branch instruction
-        elif arch == CS_ARCH_SPARC:
-            gadgets = [
-                [b"\x81\xc0[\x00\x40\x80\xc0]{1}\x00", 4, 4]  # jmp %g[0-3]
-            ]
-            arch_mode = CS_MODE_BIG_ENDIAN
         elif arch == CS_ARCH_ARM64:
             gadgets = [
                 [b"[\x00\x20\x40\x60\x80\xa0\xc0\xe0]{1}[\x00\x02]{1}\x1f\xd6", 4, 4],  # br  reg
@@ -193,8 +188,6 @@ class Gadgets:
             ]
         elif arch == CS_ARCH_PPC:
             gadgets = []  # TODO (sc inst)
-        elif arch == CS_ARCH_SPARC:
-            gadgets = []  # TODO (ta inst)
         elif arch == CS_ARCH_ARM64:
             gadgets = []  # TODO
         elif arch == CS_ARCH_ARM:
@@ -224,8 +217,6 @@ class Gadgets:
         elif arch == CS_ARCH_MIPS:
             return gadgets
         elif arch == CS_ARCH_PPC:
-            return gadgets
-        elif arch == CS_ARCH_SPARC:
             return gadgets
         elif arch == CS_ARCH_ARM:
             return gadgets
