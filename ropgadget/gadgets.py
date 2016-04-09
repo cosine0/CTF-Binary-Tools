@@ -100,14 +100,6 @@ class Gadgets:
             ]
             arch_mode = arch_mode + CS_MODE_BIG_ENDIAN
 
-        elif arch == CS_ARCH_SPARC:
-            gadgets = [
-                [b"\x81\xc3\xe0\x08", 4, 4],  # retl
-                [b"\x81\xc7\xe0\x08", 4, 4],  # ret
-                [b"\x81\xe8\x00\x00", 4, 4]  # restore
-            ]
-            arch_mode = CS_MODE_BIG_ENDIAN
-
         elif arch == CS_ARCH_ARM:
             gadgets = []  # ARM doesn't contains RET instruction set. Only JOP gadgets
         elif arch == CS_ARCH_ARM64:
