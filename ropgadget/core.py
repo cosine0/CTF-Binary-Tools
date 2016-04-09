@@ -100,7 +100,7 @@ class Core(cmd.Cmd):
                 string = section["opcodes"][ref:ref + len(string)]
                 rangeS = int(self.__options.range.split('-')[0], 16)
                 rangeE = int(self.__options.range.split('-')[1], 16)
-                if (rangeS == 0 and rangeE == 0) or (vaddr >= rangeS and vaddr <= rangeE):
+                if (rangeS == 0 and rangeE == 0) or (rangeS <= vaddr <= rangeE):
                     print(("0x%08x" % vaddr if arch == CS_MODE_32 else "0x%016x" % vaddr) + " : %s" % string)
         return True
 
@@ -118,7 +118,7 @@ class Core(cmd.Cmd):
                 vaddr = self.__offset + section["vaddr"] + ref
                 rangeS = int(self.__options.range.split('-')[0], 16)
                 rangeE = int(self.__options.range.split('-')[1], 16)
-                if (rangeS == 0 and rangeE == 0) or (vaddr >= rangeS and vaddr <= rangeE):
+                if (rangeS == 0 and rangeE == 0) or (rangeS <= vaddr <= rangeE):
                     print(("0x%08x" % vaddr if arch == CS_MODE_32 else "0x%016x" % vaddr) + " : %s" % opcodes)
         return True
 
