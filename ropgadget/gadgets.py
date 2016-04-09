@@ -128,7 +128,6 @@ class Gadgets:
                 [b"\xff[\xd0\xd1\xd2\xd3\xd4\xd6\xd7]{1}", 2, 1]  # call [reg]
             ]
 
-
         elif arch == CS_ARCH_MIPS:
             gadgets = [
                 [b"\x09\xf8\x20\x03[\x00-\xff]{4}", 8, 4],  # jrl $t9
