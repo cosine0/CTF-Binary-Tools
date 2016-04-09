@@ -357,8 +357,6 @@ class ELF:
             return CS_ARCH_MIPS
         elif self.__ElfHeader.e_machine == ELFFlags.EM_PowerPC:
             return CS_ARCH_PPC
-        elif self.__ElfHeader.e_machine == ELFFlags.EM_SPARCv8p:
-            return CS_ARCH_SPARC
         else:
             print("[Error] ELF.getArch() - Architecture not supported")
             return None
