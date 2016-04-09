@@ -1,23 +1,24 @@
-## -*- coding: utf-8 -*-
-##
-##  Jonathan Salwan - 2014-05-12
-## 
-##  http://shell-storm.org
-##  http://twitter.com/JonathanSalwan
-## 
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software  Foundation, either  version 3 of  the License, or
-##  (at your option) any later version.
-##
+# -*- coding: utf-8 -*-
+#
+#  Jonathan Salwan - 2014-05-12
+#
+#  http://shell-storm.org
+#  http://twitter.com/JonathanSalwan
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software  Foundation, either  version 3 of  the License, or
+#  (at your option) any later version.
+#
 
 from capstone import *
+
 
 class Raw:
     def __init__(self, binary, arch, mode):
         self.__binary = bytearray(binary)
-        self.__arch   = arch
-        self.__mode   = mode
+        self.__arch = arch
+        self.__mode = mode
 
     def getEntryPoint(self):
         return 0x0
@@ -29,14 +30,14 @@ class Raw:
         return []
 
     def getArch(self):
-        arch =  {
-                    "x86":      CS_ARCH_X86,
-                    "arm":      CS_ARCH_ARM,
-                    "arm64":    CS_ARCH_ARM64,
-                    "sparc":    CS_ARCH_SPARC,
-                    "mips":     CS_ARCH_MIPS,
-                    "ppc":      CS_ARCH_PPC
-                }
+        arch = {
+            "x86": CS_ARCH_X86,
+            "arm": CS_ARCH_ARM,
+            "arm64": CS_ARCH_ARM64,
+            "sparc": CS_ARCH_SPARC,
+            "mips": CS_ARCH_MIPS,
+            "ppc": CS_ARCH_PPC
+        }
         try:
             ret = arch[self.__arch]
         except:
@@ -45,12 +46,12 @@ class Raw:
         return ret
 
     def getArchMode(self):
-        mode =  {
-                    "32":      CS_MODE_32,
-                    "64":      CS_MODE_64,
-                    "arm":     CS_MODE_ARM,
-                    "thumb":   CS_MODE_THUMB
-                }
+        mode = {
+            "32": CS_MODE_32,
+            "64": CS_MODE_64,
+            "arm": CS_MODE_ARM,
+            "thumb": CS_MODE_THUMB
+        }
         try:
             ret = mode[self.__mode]
         except:
@@ -60,4 +61,3 @@ class Raw:
 
     def getFormat(self):
         return "Raw"
-

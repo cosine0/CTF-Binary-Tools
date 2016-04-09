@@ -289,7 +289,7 @@ class ELF:
 
         # setup name from the strings table
         if self.__ElfHeader.e_shstrndx != 0:
-            string_table = str(self.__binary[(self.__shdr_l[self.__ElfHeader.e_shstrndx].sh_offset):])
+            string_table = str(self.__binary[self.__shdr_l[self.__ElfHeader.e_shstrndx].sh_offset:])
             for i in range(shdr_num):
                 self.__shdr_l[i].str_name = string_table[self.__shdr_l[i].sh_name:].split('\0')[0]
 

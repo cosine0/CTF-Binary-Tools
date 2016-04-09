@@ -10,8 +10,6 @@
 #  the Free Software  Foundation, either  version 3 of  the License, or
 #  (at your option) any later version.
 
-from binascii import unhexlify
-
 from ropgadget.loaders.elf import *
 from ropgadget.loaders.pe import *
 from ropgadget.loaders.raw import *
