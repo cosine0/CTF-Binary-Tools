@@ -1,23 +1,24 @@
-## -*- coding: utf-8 -*-
-##
-##  Jonathan Salwan - 2014-05-17 - ROPgadget tool
-## 
-##  http://twitter.com/JonathanSalwan
-##  http://shell-storm.org/project/ROPgadget/
-## 
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software  Foundation, either  version 3 of  the License, or
-##  (at your option) any later version.
+# -*- coding: utf-8 -*-
+#
+#  Jonathan Salwan - 2014-05-17 - ROPgadget tool
+#
+#  http://twitter.com/JonathanSalwan
+#  http://shell-storm.org/project/ROPgadget/
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software  Foundation, either  version 3 of  the License, or
+#  (at your option) any later version.
 
-from capstone   import CS_MODE_32
-from struct     import pack
+from capstone import CS_MODE_32
+from struct import pack
+
 
 class Options:
     def __init__(self, options, binary, gadgets):
         self.__options = options
         self.__gadgets = gadgets
-        self.__binary  = binary 
+        self.__binary = binary
 
         if options.filter:   self.__filterOption()
         if options.only:     self.__onlyOption()
@@ -27,10 +28,10 @@ class Options:
     def __filterOption(self):
         new = []
         if not self.__options.filter:
-            return 
+            return
         filt = self.__options.filter.split("|")
         if not len(filt):
-            return 
+            return
         for gadget in self.__gadgets:
             flag = 0
             insts = gadget["gadget"].split(" ; ")
@@ -45,10 +46,10 @@ class Options:
     def __onlyOption(self):
         new = []
         if not self.__options.only:
-            return 
+            return
         only = self.__options.only.split("|")
         if not len(only):
-            return 
+            return
         for gadget in self.__gadgets:
             flag = 0
             insts = gadget["gadget"].split(" ; ")
@@ -65,10 +66,10 @@ class Options:
         rangeS = int(self.__options.range.split('-')[0], 16)
         rangeE = int(self.__options.range.split('-')[1], 16)
         if rangeS == 0 and rangeE == 0:
-            return 
+            return
         for gadget in self.__gadgets:
             vaddr = gadget["vaddr"]
-            if vaddr >= rangeS and vaddr <= rangeE:
+            if rangeS <= vaddr <= rangeE:
                 new += [gadget]
         self.__gadgets = new
 
@@ -76,8 +77,8 @@ class Options:
         if not self.__options.badbytes:
             return
         new = []
-        #Filter out empty badbytes (i.e if badbytes was set to 00|ff| there's an empty badbyte after the last '|')
-        #and convert each one to the corresponding byte
+        # Filter out empty badbytes (i.e if badbytes was set to 00|ff| there's an empty badbyte after the last '|')
+        # and convert each one to the corresponding byte
         bbytes = [bb.decode('hex') for bb in self.__options.badbytes.split("|") if bb]
         archMode = self.__binary.getArchMode()
         for gadget in self.__gadgets:
@@ -92,4 +93,3 @@ class Options:
 
     def getGadgets(self):
         return self.__gadgets
-
