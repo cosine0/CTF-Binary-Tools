@@ -13,7 +13,7 @@
 #
 
 import re
-from struct import pack
+import ROPgadget.ropgadget.ropchain.ropmaker
 
 
 class ROPMakerX86:
@@ -139,7 +139,8 @@ class ROPMakerX86:
 
         for i in range(11):
             payload_code += ("\tp += pack('<I', 0x%08x) # %s\n" % (incEax["vaddr"], incEax["gadget"]))
-            payload_code += self.__padding(incEax, {"ebx": dataAddr, "ecx": dataAddr + 8})  # Don't overwrite ebx and ecx
+            payload_code += self.__padding(incEax,
+                                           {"ebx": dataAddr, "ecx": dataAddr + 8})  # Don't overwrite ebx and ecx
 
             payload_code += ("\tp += pack('<I', 0x%08x) # %s\n" % (syscall["vaddr"], syscall["gadget"]))
         return payload_code
@@ -157,8 +158,8 @@ class ROPMakerX86:
         while True:
             write4where = self.__lookingForWrite4Where(gadgetsAlreadyTested)
             if not write4where:
-                print("\t[-] Can't find the 'mov dword ptr [r32], r32' gadget")
-                return
+                raise ROPgadget.ropgadget.ropchain.ropmaker.NotEnoughGadgetError(
+                    "\t[-] Can't find the 'mov dword ptr [r32], r32' gadget")
 
             popDst = self.__lookingForSomeThing("pop %s" % (write4where[1]))
             if not popDst:
@@ -185,37 +186,37 @@ class ROPMakerX86:
 
         xorEax = self.__lookingForSomeThing("xor eax, eax")
         if not xorEax:
-            print("\t[-] Can't find the 'xor eax, eax' instuction")
-            return
+            raise ROPgadget.ropgadget.ropchain.ropmaker.NotEnoughGadgetError(
+                "\t[-] Can't find the 'xor eax, eax' instuction")
 
         incEax = self.__lookingForSomeThing("inc eax")
         if not incEax:
-            print("\t[-] Can't find the 'inc eax' instuction")
-            return
+            raise ROPgadget.ropgadget.ropchain.ropmaker.NotEnoughGadgetError(
+                "\t[-] Can't find the 'inc eax' instuction")
 
         print("\n- Step 3 -- Init syscall arguments gadgets\n")
 
         popEbx = self.__lookingForSomeThing("pop ebx")
         if not popEbx:
-            print("\t[-] Can't find the 'pop ebx' instruction")
-            return
+            raise ROPgadget.ropgadget.ropchain.ropmaker.NotEnoughGadgetError(
+                "\t[-] Can't find the 'pop ebx' instruction")
 
         popEcx = self.__lookingForSomeThing("pop ecx")
         if not popEcx:
-            print("\t[-] Can't find the 'pop ecx' instruction")
-            return
+            raise ROPgadget.ropgadget.ropchain.ropmaker.NotEnoughGadgetError(
+                "\t[-] Can't find the 'pop ecx' instruction")
 
         popEdx = self.__lookingForSomeThing("pop edx")
         if not popEdx:
-            print("\t[-] Can't find the 'pop edx' instruction")
-            return
+            raise ROPgadget.ropgadget.ropchain.ropmaker.NotEnoughGadgetError(
+                "\t[-] Can't find the 'pop edx' instruction")
 
         print("\n- Step 4 -- Syscall gadget\n")
 
         syscall = self.__lookingForSomeThing("int 0x80")
         if not syscall:
-            print("\t[-] Can't find the 'syscall' instruction")
-            return
+            raise ROPgadget.ropgadget.ropchain.ropmaker.NotEnoughGadgetError(
+                "\t[-] Can't find the 'syscall' instruction")
 
         print("\n- Step 5 -- Build the ROP chain\n")
 
