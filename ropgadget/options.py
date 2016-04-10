@@ -15,10 +15,10 @@ from struct import pack
 
 
 class Options:
-    def __init__(self, options, binary, gadgets):
+    def __init__(self, options, arch_mode, gadgets):
         self.__options = options
         self.__gadgets = gadgets
-        self.__binary = binary
+        self.__arch_mode = arch_mode
 
         if options.filter:   self.__filterOption()
         if options.only:     self.__onlyOption()
@@ -80,9 +80,8 @@ class Options:
         # Filter out empty badbytes (i.e if badbytes was set to 00|ff| there's an empty badbyte after the last '|')
         # and convert each one to the corresponding byte
         bbytes = [bb.decode('hex') for bb in self.__options.badbytes.split("|") if bb]
-        archMode = self.__binary.getArchMode()
         for gadget in self.__gadgets:
-            gadAddr = pack("<L", gadget["vaddr"]) if archMode == CS_MODE_32 else pack("<Q", gadget["vaddr"])
+            gadAddr = pack("<L", gadget["vaddr"]) if self.__arch_mode == CS_MODE_32 else pack("<Q", gadget["vaddr"])
             try:
                 for x in bbytes:
                     if x in gadAddr: raise

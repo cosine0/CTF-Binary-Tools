@@ -13,7 +13,7 @@
 import cmd
 import re
 
-from capstone import CS_MODE_32
+from capstone import *
 
 import ropgadget.rgutils as rgutils
 from ropgadget.binary import Binary
@@ -23,34 +23,40 @@ from ropgadget.ropchain.ropmaker import ROPMaker
 
 
 class Core(cmd.Cmd):
-    def __init__(self, options):
+    def __init__(self, options, data_section, arch=None, arch_mode=None, exec_format="ELF"):
         cmd.Cmd.__init__(self)
         self.__options = options
-        self.__binary = None
+        self.__arch = arch
+        self.__arch_mode = arch_mode
+        self.__data_section = data_section
+        self.__format = exec_format
         self.__gadgets = []
         self.__offset = 0
         self.prompt = '(ROPgadget)> '
 
     def __checksBeforeManipulations(self):
-        if self.__binary is None or self.__binary.getBinary() is None or self.__binary.getArch() is None\
-                or self.__binary.getArchMode() is not None:
+        if self.__arch is None or self.__arch_mode is not None:
             return False
         return True
 
-    def __getAllgadgets(self):
-
+    def __getAllgadgets(self, code, offset):
         if not self.__checksBeforeManipulations():
             return False
 
-        G = Gadgets(self.__binary, self.__options, self.__offset)
-        execSections = self.__binary.getExecSections()
+        G = Gadgets(self.__arch, self.__arch_mode, self.__options, self.__offset)
+        execSections = [{
+            "offset": offset,
+            "size": len(code),
+            "vaddr": offset,
+            "opcodes": bytes(code)
+        }]
 
         # Find ROP/JOP/SYS gadgets
         self.__gadgets = []
         for section in execSections:
-            if not self.__options.norop: self.__gadgets += G.addROPGadgets(section)
-            if not self.__options.nojop: self.__gadgets += G.addJOPGadgets(section)
-            if not self.__options.nosys: self.__gadgets += G.addSYSGadgets(section)
+            self.__gadgets += G.addROPGadgets(section)
+            self.__gadgets += G.addJOPGadgets(section)
+            self.__gadgets += G.addSYSGadgets(section)
 
         # Pass clean single instruction and unknown instructions
         self.__gadgets = G.passClean(self.__gadgets, self.__options.multibr)
@@ -60,7 +66,7 @@ class Core(cmd.Cmd):
             self.__gadgets = rgutils.deleteDuplicateGadgets(self.__gadgets)
 
         # Applicate some Options
-        self.__gadgets = Options(self.__options, self.__binary, self.__gadgets).getGadgets()
+        self.__gadgets = Options(self.__options, self.__arch_mode, self.__gadgets).getGadgets()
 
         # Sorted alphabetically
         self.__gadgets = rgutils.alphaSortgadgets(self.__gadgets)
@@ -72,15 +78,14 @@ class Core(cmd.Cmd):
         if not self.__checksBeforeManipulations():
             return False
 
-        arch = self.__binary.getArchMode()
+        arch = self.__arch
         print("Gadgets information\n============================================================")
         for gadget in self.__gadgets:
             vaddr = gadget["vaddr"]
             insts = gadget["gadget"]
             bytes = gadget["bytes"]
-            bytesStr = " // " + bytes.encode('hex') if self.__options.dump else ""
 
-            print(("0x%08x" % vaddr if arch == CS_MODE_32 else "0x%016x" % vaddr) + " : %s" % insts + bytesStr)
+            print(("0x%08x" % vaddr if arch == CS_MODE_32 else "0x%016x" % vaddr) + " : %s" % insts)
 
         print("\nUnique gadgets found: %d" % (len(self.__gadgets)))
         return True
@@ -149,38 +154,16 @@ class Core(cmd.Cmd):
                 pass
         return True
 
-    def analyze(self):
+    def analyze(self, code, offset):
+        self.__offset = 0
 
-        try:
-            self.__offset = int(self.__options.offset, 16) if self.__options.offset else 0
-        except ValueError:
-            print("[Error] The offset must be in hexadecimal")
-            return False
-
-        if self.__options.console:
-            if self.__options.binary:
-                self.__binary = Binary(self.__options)
-                if not self.__checksBeforeManipulations():
-                    return False
-            self.cmdloop()
-            return True
-
-        self.__binary = Binary(self.__options)
         if not self.__checksBeforeManipulations():
             return False
 
-        if self.__options.string:
-            return self.__lookingForAString(self.__options.string)
-        elif self.__options.opcode:
-            return self.__lookingForOpcodes(self.__options.opcode)
-        elif self.__options.memstr:
-            return self.__lookingForMemStr(self.__options.memstr)
-        else:
-            self.__getAllgadgets()
-            self.__lookingForGadgets()
-            if self.__options.ropchain:
-                ROPMaker(self.__binary, self.__gadgets, self.__offset)
-            return True
+        self.__getAllgadgets(code, offset)
+        self.__lookingForGadgets()
+        ROPMaker(self.__arch, self.__arch_mode, self.__format, self.__gadgets, self.__offset, self.__data_section)
+        return True
 
     def gadgets(self):
         return self.__gadgets

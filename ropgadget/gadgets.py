@@ -15,8 +15,9 @@ from capstone import *
 
 
 class Gadgets:
-    def __init__(self, binary, options, offset):
-        self.__binary = binary
+    def __init__(self, arch, arch_mode, options, offset):
+        self.__arch = arch
+        self.__arch_mode = arch_mode
         self.__options = options
         self.__offset = offset
 
@@ -80,10 +81,8 @@ class Gadgets:
         return ret
 
     def addROPGadgets(self, section):
-
-        arch = self.__binary.getArch()
-        arch_mode = self.__binary.getArchMode()
-
+        arch = self.__arch
+        arch_mode = self.__arch_mode
         if arch == CS_ARCH_X86:
             gadgets = [
                 [b"\xc3", 1, 1],  # ret
@@ -117,9 +116,8 @@ class Gadgets:
         return gadgets
 
     def addJOPGadgets(self, section):
-        arch = self.__binary.getArch()
-        arch_mode = self.__binary.getArchMode()
-
+        arch = self.__arch
+        arch_mode = self.__arch_mode
         if arch == CS_ARCH_X86:
             gadgets = [
                 [b"\xff[\x20\x21\x22\x23\x26\x27]{1}", 2, 1],  # jmp  [reg]
@@ -166,10 +164,8 @@ class Gadgets:
         return gadgets
 
     def addSYSGadgets(self, section):
-
-        arch = self.__binary.getArch()
-        arch_mode = self.__binary.getArchMode()
-
+        arch = self.__arch
+        arch_mode = self.__arch_mode
         if arch == CS_ARCH_X86:
             gadgets = [
                 [b"\xcd\x80", 2, 1],  # int 0x80
@@ -210,8 +206,7 @@ class Gadgets:
         return []
 
     def passClean(self, gadgets, multibr):
-
-        arch = self.__binary.getArch()
+        arch = self.__arch
         if arch == CS_ARCH_X86:
             return self.__passCleanX86(gadgets, multibr)
         elif arch == CS_ARCH_MIPS:

@@ -1,20 +1,21 @@
-## -*- coding: utf-8 -*-
-##
-##  Jonathan Salwan - 2014-05-12 - ROPgadget tool
-## 
-##  http://twitter.com/JonathanSalwan
-##  http://shell-storm.org/project/ROPgadget/
-## 
-##  This program is free software: you can redistribute it and/or modify
-##  it under the terms of the GNU General Public License as published by
-##  the Free Software  Foundation, either  version 3 of  the License, or
-##  (at your option) any later version.
+# -*- coding: utf-8 -*-
+#
+#  Jonathan Salwan - 2014-05-12 - ROPgadget tool
+#
+#  http://twitter.com/JonathanSalwan
+#  http://shell-storm.org/project/ROPgadget/
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software  Foundation, either  version 3 of  the License, or
+#  (at your option) any later version.
 
 import argparse
 import sys
 
 from ropgadget.updateAlert import UpdateAlert
-from ropgadget.version     import *
+from ropgadget.version import *
+
 
 class Args:
     def __init__(self, arguments=None):
@@ -23,9 +24,8 @@ class Args:
 
         # If no custom arguments are provided, use the program arguments
         if not arguments:
-          arguments = sys.argv[1:]
-          custom_arguments_provided = False
-
+            arguments = sys.argv[1:]
+            custom_arguments_provided = False
 
         self.__parse(arguments, custom_arguments_provided)
 
@@ -72,29 +72,32 @@ architectures supported:
   ROPgadget.py --binary ./test-suite-binaries/elf-ARM64-bash --depth 5
   ROPgadget.py --binary ./test-suite-binaries/raw-x86.raw --rawArch=x86 --rawMode=32""")
 
-        parser.add_argument("-v", "--version",      action="store_true",              help="Display the ROPgadget's version")
-        parser.add_argument("-c", "--checkUpdate",  action="store_true",              help="Checks if a new version is available")
-        parser.add_argument("--binary",             type=str, metavar="<binary>",     help="Specify a binary filename to analyze")
-        parser.add_argument("--opcode",             type=str, metavar="<opcodes>",    help="Search opcode in executable segment")
-        parser.add_argument("--string",             type=str, metavar="<string>",     help="Search string in readable segment")
-        parser.add_argument("--memstr",             type=str, metavar="<string>",     help="Search each byte in all readable segment")
-        parser.add_argument("--depth",              type=int, metavar="<nbyte>",      default=10, help="Depth for search engine (default 10)")
-        parser.add_argument("--only",               type=str, metavar="<key>",        help="Only show specific instructions")
-        parser.add_argument("--filter",             type=str, metavar="<key>",        help="Suppress specific instructions")
-        parser.add_argument("--range",              type=str, metavar="<start-end>",  default="0x0-0x0", help="Search between two addresses (0x...-0x...)")
-        parser.add_argument("--badbytes",           type=str, metavar="<byte>",       help="Rejects specific bytes in the gadget's address")
-        parser.add_argument("--rawArch",            type=str, metavar="<arch>",       help="Specify an arch for a raw file")
-        parser.add_argument("--rawMode",            type=str, metavar="<mode>",       help="Specify a mode for a raw file")
-        parser.add_argument("--offset",             type=str, metavar="<hexaddr>",    help="Specify an offset for gadget addresses")
-        parser.add_argument("--ropchain",           action="store_true",              help="Enable the ROP chain generation")
-        parser.add_argument("--thumb"  ,            action="store_true",              help="Use the thumb mode for the search engine (ARM only)")
-        parser.add_argument("--console",            action="store_true",              help="Use an interactive console for search engine")
-        parser.add_argument("--norop",              action="store_true",              help="Disable ROP search engine")
-        parser.add_argument("--nojop",              action="store_true",              help="Disable JOP search engine")
-        parser.add_argument("--nosys",              action="store_true",              help="Disable SYS search engine")
-        parser.add_argument("--multibr",            action="store_true",              help="Enable multiple branch gadgets")
-        parser.add_argument("--all",                action="store_true",              help="Disables the removal of duplicate gadgets")
-        parser.add_argument("--dump",               action="store_true",              help="Outputs the gadget bytes")
+        parser.add_argument("-v", "--version", action="store_true", help="Display the ROPgadget's version")
+        parser.add_argument("-c", "--checkUpdate", action="store_true", help="Checks if a new version is available")
+        parser.add_argument("--binary", type=str, metavar="<binary>", help="Specify a binary filename to analyze")
+        parser.add_argument("--opcode", type=str, metavar="<opcodes>", help="Search opcode in executable segment")
+        parser.add_argument("--string", type=str, metavar="<string>", help="Search string in readable segment")
+        parser.add_argument("--memstr", type=str, metavar="<string>", help="Search each byte in all readable segment")
+        parser.add_argument("--depth", type=int, metavar="<nbyte>", default=10,
+                            help="Depth for search engine (default 10)")
+        parser.add_argument("--only", type=str, metavar="<key>", help="Only show specific instructions")
+        parser.add_argument("--filter", type=str, metavar="<key>", help="Suppress specific instructions")
+        parser.add_argument("--range", type=str, metavar="<start-end>", default="0x0-0x0",
+                            help="Search between two addresses (0x...-0x...)")
+        parser.add_argument("--badbytes", type=str, metavar="<byte>",
+                            help="Rejects specific bytes in the gadget's address")
+        parser.add_argument("--rawArch", type=str, metavar="<arch>", help="Specify an arch for a raw file")
+        parser.add_argument("--rawMode", type=str, metavar="<mode>", help="Specify a mode for a raw file")
+        parser.add_argument("--offset", type=str, metavar="<hexaddr>", help="Specify an offset for gadget addresses")
+        parser.add_argument("--ropchain", action="store_true", help="Enable the ROP chain generation")
+        parser.add_argument("--thumb", action="store_true", help="Use the thumb mode for the search engine (ARM only)")
+        parser.add_argument("--console", action="store_true", help="Use an interactive console for search engine")
+        parser.add_argument("--norop", action="store_true", help="Disable ROP search engine")
+        parser.add_argument("--nojop", action="store_true", help="Disable JOP search engine")
+        parser.add_argument("--nosys", action="store_true", help="Disable SYS search engine")
+        parser.add_argument("--multibr", action="store_true", help="Enable multiple branch gadgets")
+        parser.add_argument("--all", action="store_true", help="Disables the removal of duplicate gadgets")
+        parser.add_argument("--dump", action="store_true", help="Outputs the gadget bytes")
 
         self.__args = parser.parse_args(arguments)
 
@@ -126,11 +129,10 @@ architectures supported:
                 sys.exit(-1)
 
     def __printVersion(self):
-        print("Version:        %s" %(PYROPGADGET_VERSION))
-        print("Author:         Jonathan Salwan" )
-        print("Author page:    https://twitter.com/JonathanSalwan" )
-        print("Project page:   http://shell-storm.org/project/ROPgadget/" )
+        print("Version:        %s" % PYROPGADGET_VERSION)
+        print("Author:         Jonathan Salwan")
+        print("Author page:    https://twitter.com/JonathanSalwan")
+        print("Project page:   http://shell-storm.org/project/ROPgadget/")
 
     def getArgs(self):
         return self.__args
-
