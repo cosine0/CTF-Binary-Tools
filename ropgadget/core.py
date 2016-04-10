@@ -23,9 +23,8 @@ from ropgadget.ropchain.ropmaker import ROPMaker
 
 
 class Core(cmd.Cmd):
-    def __init__(self, options, data_section, arch=None, arch_mode=None, exec_format="ELF"):
+    def __init__(self, data_section, arch=None, arch_mode=None, exec_format="ELF"):
         cmd.Cmd.__init__(self)
-        self.__options = options
         self.__arch = arch
         self.__arch_mode = arch_mode
         self.__data_section = data_section
@@ -43,7 +42,7 @@ class Core(cmd.Cmd):
         if not self.__checksBeforeManipulations():
             return False
 
-        G = Gadgets(self.__arch, self.__arch_mode, self.__options, self.__offset)
+        G = Gadgets(self.__arch, self.__arch_mode, self.__offset)
         execSections = [{
             "offset": offset,
             "size": len(code),
