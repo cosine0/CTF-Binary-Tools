@@ -15,10 +15,10 @@ from capstone import *
 
 
 class Gadgets:
-    def __init__(self, arch, arch_mode, options, offset):
+    def __init__(self, arch, arch_mode, offset, depth=10):
+        self.__depth = depth
         self.__arch = arch
         self.__arch_mode = arch_mode
-        self.__options = options
         self.__offset = offset
 
     def __checkInstructionBlackListedX86(self, insts):
@@ -65,7 +65,7 @@ class Gadgets:
         for gad in gadgets:
             allRefRet = [m.start() for m in re.finditer(gad[C_OP], section["opcodes"])]
             for ref in allRefRet:
-                for i in range(self.__options.depth):
+                for i in range(self.__depth):
                     if (section["vaddr"] + ref - (i * gad[C_ALIGN])) % gad[C_ALIGN] == 0:
                         decodes = md.disasm(section["opcodes"][ref - (i * gad[C_ALIGN]):ref + gad[C_SIZE]],
                                             section["vaddr"] + ref)
@@ -205,10 +205,10 @@ class Gadgets:
             return self.__gadgetsFinding(section, gadgets, arch, arch_mode)
         return []
 
-    def passClean(self, gadgets, multibr):
+    def passClean(self, gadgets):
         arch = self.__arch
         if arch == CS_ARCH_X86:
-            return self.__passCleanX86(gadgets, multibr)
+            return self.__passCleanX86(gadgets)
         elif arch == CS_ARCH_MIPS:
             return gadgets
         elif arch == CS_ARCH_PPC:

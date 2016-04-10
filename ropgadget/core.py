@@ -15,40 +15,40 @@ import re
 
 from capstone import *
 
-import ropgadget.rgutils as rgutils
-from ropgadget.binary import Binary
-from ropgadget.gadgets import Gadgets
-from ropgadget.options import Options
-from ropgadget.ropchain.ropmaker import ROPMaker
+import rgutils as rgutils
+from binary import Binary
+from gadgets import Gadgets
+from options import Options
+from ropchain.ropmaker import ROPMaker
 
 
 class Core(cmd.Cmd):
-    def __init__(self, data_section, arch=None, arch_mode=None, exec_format="ELF"):
+    def __init__(self, data_section, arch=None, arch_mode=None, exec_format="ELF", all_gadgets=False, filter='',
+                 only='', range='', badbytes=''):
         cmd.Cmd.__init__(self)
         self.__arch = arch
         self.__arch_mode = arch_mode
         self.__data_section = data_section
         self.__format = exec_format
         self.__gadgets = []
+        self.__all = all_gadgets
+        self.__filter = filter
+        self.__only = only
+        self.__range = range
+        self.__badbytes = badbytes
         self.__offset = 0
         self.prompt = '(ROPgadget)> '
 
     def __checksBeforeManipulations(self):
-        if self.__arch is None or self.__arch_mode is not None:
+        if self.__arch is None or self.__arch_mode is None:
             return False
         return True
 
-    def __getAllgadgets(self, code, offset):
+    def __getAllgadgets(self, execSections):
         if not self.__checksBeforeManipulations():
             return False
 
         G = Gadgets(self.__arch, self.__arch_mode, self.__offset)
-        execSections = [{
-            "offset": offset,
-            "size": len(code),
-            "vaddr": offset,
-            "opcodes": bytes(code)
-        }]
 
         # Find ROP/JOP/SYS gadgets
         self.__gadgets = []
@@ -58,35 +58,36 @@ class Core(cmd.Cmd):
             self.__gadgets += G.addSYSGadgets(section)
 
         # Pass clean single instruction and unknown instructions
-        self.__gadgets = G.passClean(self.__gadgets, self.__options.multibr)
+        self.__gadgets = G.passClean(self.__gadgets)
 
         # Delete duplicate gadgets
-        if not self.__options.all:
+        if not self.__all:
             self.__gadgets = rgutils.deleteDuplicateGadgets(self.__gadgets)
 
         # Applicate some Options
-        self.__gadgets = Options(self.__options, self.__arch_mode, self.__gadgets).getGadgets()
+        self.__gadgets = Options(self.__arch_mode, self.__gadgets, self.__filter, self.__only, self.__range,
+                                 self.__badbytes).getGadgets()
 
         # Sorted alphabetically
         self.__gadgets = rgutils.alphaSortgadgets(self.__gadgets)
 
         return True
 
-    def __lookingForGadgets(self):
+    def __lookingForGadgets(self, print_gadgets):
 
         if not self.__checksBeforeManipulations():
             return False
 
         arch = self.__arch
-        print("Gadgets information\n============================================================")
-        for gadget in self.__gadgets:
-            vaddr = gadget["vaddr"]
-            insts = gadget["gadget"]
-            bytes = gadget["bytes"]
+        if print_gadgets:
+            print("Gadgets information\n============================================================")
+            for gadget in self.__gadgets:
+                vaddr = gadget["vaddr"]
+                insts = gadget["gadget"]
 
-            print(("0x%08x" % vaddr if arch == CS_MODE_32 else "0x%016x" % vaddr) + " : %s" % insts)
+                print(("0x%08x" % vaddr if arch == CS_MODE_32 else "0x%016x" % vaddr) + " : %s" % insts)
 
-        print("\nUnique gadgets found: %d" % (len(self.__gadgets)))
+            print("\nUnique gadgets found: %d" % (len(self.__gadgets)))
         return True
 
     def __lookingForAString(self, string):
@@ -153,16 +154,17 @@ class Core(cmd.Cmd):
                 pass
         return True
 
-    def analyze(self, code, offset):
+    def analyze(self, exec_sections, print_gadgets=False):
         self.__offset = 0
 
         if not self.__checksBeforeManipulations():
             return False
 
-        self.__getAllgadgets(code, offset)
-        self.__lookingForGadgets()
-        ROPMaker(self.__arch, self.__arch_mode, self.__format, self.__gadgets, self.__offset, self.__data_section)
-        return True
+        self.__getAllgadgets(exec_sections)
+        self.__lookingForGadgets(print_gadgets)
+        code = ROPMaker(self.__arch, self.__arch_mode, self.__format, self.__gadgets, self.__offset,
+                        self.__data_section).generate()
+        return code
 
     def gadgets(self):
         return self.__gadgets

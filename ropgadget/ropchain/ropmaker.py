@@ -11,8 +11,8 @@
 #  (at your option) any later version.
 #
 
-from ropgadget.ropchain.arch.ropmakerx64 import *
-from ropgadget.ropchain.arch.ropmakerx86 import *
+from ..ropchain.arch.ropmakerx64 import *
+from ..ropchain.arch.ropmakerx86 import *
 from capstone import *
 
 
@@ -25,19 +25,17 @@ class ROPMaker:
         self.__gadgets = gadgets
         self.__offset = offset
 
-        self.__handlerArch()
-
-    def __handlerArch(self):
+    def generate(self):
 
         if self.__arch == CS_ARCH_X86 \
                 and self.__arch_mode == CS_MODE_32 \
                 and self.__format == "ELF":
-            ROPMakerX86(self.__data_section, self.__gadgets, self.__offset)
+            return ROPMakerX86(self.__data_section, self.__gadgets, self.__offset).generate()
 
         elif self.__arch == CS_ARCH_X86 \
                 and self.__arch_mode == CS_MODE_64 \
                 and self.__format == "ELF":
-            ROPMakerX64(self.__data_section, self.__gadgets, self.__offset)
+            return ROPMakerX64(self.__data_section, self.__gadgets, self.__offset).generate()
 
         else:
             print("\n[Error] ROPMaker.__handlerArch - Arch not supported yet for the rop chain generation")
