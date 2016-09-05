@@ -584,7 +584,7 @@ class FSB(object):
             output = output[printed_prefix_length:]
             result = dict()
             if argument_leak_size is None:
-                digit_length = self.address_size_in_byte * 2 + 28
+                digit_length = self.address_size_in_byte * 2 + 2
             else:
                 digit_length = argument_leak_size * 2
             for target in argument_targets:
